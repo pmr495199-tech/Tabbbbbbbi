@@ -19,7 +19,7 @@
         body {
             margin: 0;
             padding: 0;
-            /* Встановлюємо фонове зображення */
+            /* Фронтове зображення */
             background: linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.6)), url('1792533735065.jpg') no-repeat center center fixed;
             background-size: cover;
             color: var(--text-color);
@@ -31,6 +31,61 @@
             overflow: hidden;
             user-select: none;
             -webkit-user-select: none;
+        }
+
+        /* Модальне вікно вибору мови для нових гравців */
+        .language-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.85);
+            backdrop-filter: blur(8px);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            padding: 20px;
+            box-sizing: border-box;
+            text-align: center;
+        }
+
+        .language-modal.hidden {
+            display: none;
+        }
+
+        .lang-modal-card {
+            background: var(--secondary-bg);
+            padding: 25px;
+            border-radius: 20px;
+            width: 90%;
+            max-width: 320px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        }
+
+        .lang-option-btn {
+            background-color: var(--button-color);
+            color: var(--button-text-color);
+            border: none;
+            border-radius: 12px;
+            padding: 14px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            transition: transform 0.1s ease;
+        }
+
+        .lang-option-btn:active {
+            transform: scale(0.96);
         }
 
         /* Контейнер для вкладок */
@@ -184,18 +239,18 @@
             align-items: center;
             justify-content: center;
             color: var(--hint-color);
-            font-size: 11px;
+            font-size: 10px;
             background: none;
             border: none;
             cursor: pointer;
-            width: 25%;
+            width: 20%;
             height: 100%;
             transition: color 0.2s ease;
         }
 
         .nav-item .icon {
-            font-size: 20px;
-            margin-bottom: 4px;
+            font-size: 18px;
+            margin-bottom: 3px;
         }
 
         .nav-item.active {
@@ -206,10 +261,24 @@
 </head>
 <body>
 
+    <!-- Вікно вибору мови при першому вході -->
+    <div id="languageModal" class="language-modal hidden">
+        <div class="lang-modal-card">
+            <h2>Оберіть мову / Выберите язык</h2>
+            <p style="color: var(--hint-color); font-size: 14px; margin-bottom: 20px;">Можна змінити пізніше в налаштуваннях / Можно изменить позже в настройках</p>
+            <button class="lang-option-btn" onclick="selectInitialLanguage('uk')">
+                <span>🇺🇦</span> Українська
+            </button>
+            <button class="lang-option-btn" onclick="selectInitialLanguage('ru')">
+                <span>🇷🇺</span> Русский
+            </button>
+        </div>
+    </div>
+
     <!-- Вкладка 1: Головна гра -->
     <div id="tab-game" class="tab-content active">
         <div class="header">
-            <div class="score-title">Баланс балів</div>
+            <div class="score-title" id="txt-score-title">Баланс балів</div>
             <div class="score-value" id="score">0</div>
         </div>
 
@@ -225,7 +294,7 @@
 
         <div class="upgrade-section">
             <button class="upgrade-btn" id="upgradeBtn" onclick="buyUpgrade()">
-                <span>🚀 Подвійний клік (+1)</span>
+                <span id="txt-upgrade-title">🚀 Подвійний клік (+1)</span>
                 <span id="upgradeCost">🪙 50</span>
             </button>
         </div>
@@ -234,11 +303,11 @@
     <!-- Вкладка 2: Завдання -->
     <div id="tab-tasks" class="tab-content">
         <div class="page-padding">
-            <h2>📋 Завдання</h2>
+            <h2 id="txt-tasks-header">📋 Завдання</h2>
             <div class="card">
-                <h3>📢 Підписка на канал</h3>
-                <p style="color: var(--hint-color); font-size: 14px;">Підпишіться на телеграм канал для отримання бонусів.</p>
-                <button class="upgrade-btn" style="margin-top: 10px;">Отримати +500</button>
+                <h3 id="txt-task1-title">📢 Підписка на канал</h3>
+                <p id="txt-task1-desc" style="color: var(--hint-color); font-size: 14px;">Підпишіться на телеграм канал для отримання бонусів.</p>
+                <button class="upgrade-btn" style="margin-top: 10px;" id="txt-task1-btn">Отримати +500</button>
             </div>
         </div>
     </div>
@@ -246,10 +315,10 @@
     <!-- Вкладка 3: Реферали -->
     <div id="tab-friends" class="tab-content">
         <div class="page-padding">
-            <h2>👥 Друзі</h2>
-            <p style="color: var(--hint-color);">Запрошуйте друзів та отримуйте % від їхніх кліків!</p>
+            <h2 id="txt-friends-header">👥 Друзі</h2>
+            <p id="txt-friends-desc" style="color: var(--hint-color);">Запрошуйте друзів та отримуйте % від їхніх кліків!</p>
             <div class="card">
-                <h3>Твоє посилання:</h3>
+                <h3 id="txt-friends-link-title">Твоє посилання:</h3>
                 <p style="word-break: break-all; color: var(--button-color);">https://t.me/your_bot?start=12345</p>
             </div>
         </div>
@@ -258,9 +327,25 @@
     <!-- Вкладка 4: Гаманець -->
     <div id="tab-wallet" class="tab-content">
         <div class="page-padding">
-            <h2>👛 Гаманець</h2>
-            <p style="color: var(--hint-color);">Підключіть свій TON гаманець для виводу балів.</p>
+            <h2 id="txt-wallet-header">👛 Гаманець</h2>
+            <p id="txt-wallet-desc" style="color: var(--hint-color);">Підключіть свій TON гаманець для виводу балів.</p>
             <button class="upgrade-btn" style="margin-top: 20px;">Connect TON Wallet</button>
+        </div>
+    </div>
+
+    <!-- Вкладка 5: Налаштування -->
+    <div id="tab-settings" class="tab-content">
+        <div class="page-padding">
+            <h2 id="txt-settings-header">⚙️ Налаштування</h2>
+            <div class="card">
+                <h3 id="txt-settings-lang-title">Мова / Язык</h3>
+                <button class="lang-option-btn" onclick="setLanguage('uk')">
+                    <span>🇺🇦</span> Українська
+                </button>
+                <button class="lang-option-btn" onclick="setLanguage('ru')">
+                    <span>🇷🇺</span> Русский
+                </button>
+            </div>
         </div>
     </div>
 
@@ -268,19 +353,23 @@
     <nav class="navbar">
         <button class="nav-item active" onclick="switchTab('tab-game', this)">
             <span class="icon">🎮</span>
-            <span>Гра</span>
+            <span id="nav-game">Гра</span>
         </button>
         <button class="nav-item" onclick="switchTab('tab-tasks', this)">
             <span class="icon">📋</span>
-            <span>Завдання</span>
+            <span id="nav-tasks">Завдання</span>
         </button>
         <button class="nav-item" onclick="switchTab('tab-friends', this)">
             <span class="icon">👥</span>
-            <span>Друзі</span>
+            <span id="nav-friends">Друзі</span>
         </button>
         <button class="nav-item" onclick="switchTab('tab-wallet', this)">
             <span class="icon">👛</span>
-            <span>Гаманець</span>
+            <span id="nav-wallet">Гаманець</span>
+        </button>
+        <button class="nav-item" onclick="switchTab('tab-settings', this)">
+            <span class="icon">⚙️</span>
+            <span id="nav-settings">Налаштув.</span>
         </button>
     </nav>
 
@@ -289,6 +378,51 @@
         let tg = window.Telegram.WebApp;
         tg.expand();
 
+        // Словник перекладів
+        const translations = {
+            uk: {
+                scoreTitle: "Баланс балів",
+                upgradeTitle: "🚀 Подвійний клік (+1)",
+                navGame: "Гра",
+                navTasks: "Завдання",
+                navFriends: "Друзі",
+                navWallet: "Гаманець",
+                navSettings: "Налаштув.",
+                tasksHeader: "📋 Завдання",
+                task1Title: "📢 Підписка на канал",
+                task1Desc: "Підпишіться на телеграм канал для отримання бонусів.",
+                task1Btn: "Отримати +500",
+                friendsHeader: "👥 Друзі",
+                friendsDesc: "Запрошуйте друзів та отримуйте % від їхніх кліків!",
+                friendsLinkTitle: "Твоє посилання:",
+                walletHeader: "👛 Гаманець",
+                walletDesc: "Підключіть свій TON гаманець для виводу балів.",
+                settingsHeader: "⚙️ Налаштування",
+                settingsLangTitle: "Мова / Язык"
+            },
+            ru: {
+                scoreTitle: "Баланс очков",
+                upgradeTitle: "🚀 Двойной клик (+1)",
+                navGame: "Игра",
+                navTasks: "Задания",
+                navFriends: "Друзья",
+                navWallet: "Кошелек",
+                navSettings: "Настройки",
+                tasksHeader: "📋 Задания",
+                task1Title: "📢 Подписка на канал",
+                task1Desc: "Подпишитесь на телеграм канал для получения бонусов.",
+                task1Btn: "Получить +500",
+                friendsHeader: "👥 Друзья",
+                friendsDesc: "Приглашайте друзей и получайте % от их кликов!",
+                friendsLinkTitle: "Твоя ссылка:",
+                walletHeader: "👛 Кошелек",
+                walletDesc: "Подключите свой TON кошелек для вывода очков.",
+                settingsHeader: "⚙️ Настройки",
+                settingsLangTitle: "Мова / Язык"
+            }
+        };
+
+        let currentLang = localStorage.getItem('clicker_lang') || null;
         let score = parseInt(localStorage.getItem('clicker_score')) || 0;
         let clickPower = parseInt(localStorage.getItem('clicker_power')) || 1;
         let upgradeCost = parseInt(localStorage.getItem('clicker_cost')) || 50;
@@ -297,6 +431,57 @@
         const clickBtn = document.getElementById('clickBtn');
         const upgradeBtn = document.getElementById('upgradeBtn');
         const upgradeCostEl = document.getElementById('upgradeCost');
+        const languageModal = document.getElementById('languageModal');
+
+        // Перевірка при першому запуску
+        if (!currentLang) {
+            languageModal.classList.remove('hidden');
+            currentLang = 'uk'; // Мова за замовчуванням
+        } else {
+            applyLanguage(currentLang);
+        }
+
+        function selectInitialLanguage(lang) {
+            setLanguage(lang);
+            languageModal.classList.add('hidden');
+        }
+
+        function setLanguage(lang) {
+            currentLang = lang;
+            localStorage.setItem('clicker_lang', lang);
+            applyLanguage(lang);
+            
+            if (tg.HapticFeedback) {
+                tg.HapticFeedback.notificationOccurred('success');
+            }
+        }
+
+        function applyLanguage(lang) {
+            const t = translations[lang];
+            document.getElementById('txt-score-title').innerText = t.scoreTitle;
+            document.getElementById('txt-upgrade-title').innerText = t.upgradeTitle;
+            
+            document.getElementById('nav-game').innerText = t.navGame;
+            document.getElementById('nav-tasks').innerText = t.navTasks;
+            document.getElementById('nav-friends').innerText = t.navFriends;
+            document.getElementById('nav-wallet').innerText = t.navWallet;
+            document.getElementById('nav-settings').innerText = t.navSettings;
+
+            document.getElementById('txt-tasks-header').innerText = t.tasksHeader;
+            document.getElementById('txt-task1-title').innerText = t.task1Title;
+            document.getElementById('txt-task1-desc').innerText = t.task1Desc;
+            document.getElementById('txt-task1-btn').innerText = t.task1Btn;
+
+            document.getElementById('txt-friends-header').innerText = t.friendsHeader;
+            document.getElementById('txt-friends-desc').innerText = t.friendsDesc;
+            document.getElementById('txt-friends-link-title').innerText = t.friendsLinkTitle;
+
+            document.getElementById('txt-wallet-header').innerText = t.walletHeader;
+            document.getElementById('txt-wallet-desc').innerText = t.walletDesc;
+
+            document.getElementById('txt-settings-header').innerText = t.settingsHeader;
+            document.getElementById('txt-settings-lang-title').innerText = t.settingsLangTitle;
+        }
 
         function updateUI() {
             scoreEl.innerText = score;
