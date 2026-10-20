@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>Crypto Clicker Mini App</title>
+    <title>Telegram Mini App Clicker</title>
     <!-- Підключаємо офіційний скрипт Telegram Web App -->
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
@@ -13,6 +13,7 @@
             --hint-color: var(--tg-theme-hint-color, #aaaaaa);
             --button-color: var(--tg-theme-button-color, #2481cc);
             --button-text-color: var(--tg-theme-button-text-color, #ffffff);
+            --secondary-bg: var(--tg-theme-secondary-bg-color, #1e1e1e);
         }
 
         body {
@@ -23,8 +24,6 @@
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
             display: flex;
             flex-direction: column;
-            align-items: center;
-            justify-content: space-between;
             height: 100vh;
             height: 100dvh;
             overflow: hidden;
@@ -32,6 +31,23 @@
             -webkit-user-select: none;
         }
 
+        /* Контейнер для вкладок */
+        .tab-content {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: space-between;
+            flex-grow: 1;
+            padding-bottom: 70px; /* Місце під навігаційне меню */
+            box-sizing: border-box;
+            overflow-y: auto;
+        }
+
+        .tab-content.active {
+            display: flex;
+        }
+
+        /* Верхня частина з балансом */
         .header {
             text-align: center;
             margin-top: 20px;
@@ -50,6 +66,7 @@
             margin-top: 5px;
         }
 
+        /* Клікер із фото Зеленського */
         .clicker-container {
             display: flex;
             align-items: center;
@@ -57,32 +74,26 @@
             flex-grow: 1;
         }
 
-        .coin {
-            width: 180px;
-            height: 180px;
-            background: linear-gradient(135deg, #f39c12, #d35400);
+        .avatar-button {
+            width: 200px;
+            height: 200px;
             border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 64px;
-            box-shadow: 0 10px 30px rgba(243, 156, 18, 0.4);
+            object-fit: cover;
+            border: 4px solid var(--button-color);
+            box-shadow: 0 10px 30px rgba(36, 129, 204, 0.4);
             cursor: pointer;
             transition: transform 0.1s ease, box-shadow 0.1s ease;
         }
 
-        .coin:active {
+        .avatar-button:active {
             transform: scale(0.92);
-            box-shadow: 0 5px 15px rgba(243, 156, 18, 0.3);
+            box-shadow: 0 5px 15px rgba(36, 129, 204, 0.3);
         }
 
-        .footer {
+        .upgrade-section {
             width: 100%;
-            padding: 20px;
+            padding: 0 20px 10px 20px;
             box-sizing: border-box;
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
         }
 
         .upgrade-btn {
@@ -106,12 +117,12 @@
             cursor: not-allowed;
         }
 
-        /* Анімація появи +1 при кліку */
+        /* Анімація числа при кліку */
         .floating-text {
             position: absolute;
-            font-size: 24px;
+            font-size: 26px;
             font-weight: bold;
-            color: #f39c12;
+            color: #2481cc;
             animation: floatUp 0.8s ease-out forwards;
             pointer-events: none;
         }
@@ -126,37 +137,155 @@
                 transform: translateY(-80px) scale(1.2);
             }
         }
+
+        /* Інші сторінки */
+        .page-padding {
+            padding: 20px;
+            width: 100%;
+            box-sizing: border-box;
+            text-align: center;
+        }
+
+        .card {
+            background-color: var(--secondary-bg);
+            border-radius: 12px;
+            padding: 15px;
+            margin-top: 15px;
+            text-align: left;
+        }
+
+        /* Нижнє навігаційне меню */
+        .navbar {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 65px;
+            background-color: var(--secondary-bg);
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            border-top: 1px solid rgba(255, 255, 255, 0.08);
+            z-index: 100;
+        }
+
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: var(--hint-color);
+            font-size: 11px;
+            background: none;
+            border: none;
+            cursor: pointer;
+            width: 25%;
+            height: 100%;
+            transition: color 0.2s ease;
+        }
+
+        .nav-item .icon {
+            font-size: 20px;
+            margin-bottom: 4px;
+        }
+
+        .nav-item.active {
+            color: var(--button-color);
+            font-weight: bold;
+        }
     </style>
 </head>
 <body>
 
-    <div class="header">
-        <div class="score-title">Баланс монет</div>
-        <div class="score-value" id="score">0</div>
+    <!-- Вкладка 1: Головна гра -->
+    <div id="tab-game" class="tab-content active">
+        <div class="header">
+            <div class="score-title">Баланс балів</div>
+            <div class="score-value" id="score">0</div>
+        </div>
+
+        <div class="clicker-container">
+            <!-- Фото Володимира Зеленського -->
+            <img 
+                src="https://upload.wikimedia.org/wikipedia/commons/9/9c/Volodymyr_Zelensky_Official_portrait.jpg" 
+                alt="Volodymyr Zelensky" 
+                class="avatar-button" 
+                id="clickBtn"
+            >
+        </div>
+
+        <div class="upgrade-section">
+            <button class="upgrade-btn" id="upgradeBtn" onclick="buyUpgrade()">
+                <span>🚀 Подвійний клік (+1)</span>
+                <span id="upgradeCost">🪙 50</span>
+            </button>
+        </div>
     </div>
 
-    <div class="clicker-container">
-        <div class="coin" id="coinBtn">🪙</div>
+    <!-- Вкладка 2: Завдання -->
+    <div id="tab-tasks" class="tab-content">
+        <div class="page-padding">
+            <h2>📋 Завдання</h2>
+            <div class="card">
+                <h3>📢 Підписка на канал</h3>
+                <p style="color: var(--hint-color); font-size: 14px;">Підпишіться на телеграм канал для отримання бонусів.</p>
+                <button class="upgrade-btn" style="margin-top: 10px;">Отримати +500</button>
+            </div>
+        </div>
     </div>
 
-    <div class="footer">
-        <button class="upgrade-btn" id="upgradeBtn" onclick="buyUpgrade()">
-            <span>🚀 Подвійний клік (+1)</span>
-            <span id="upgradeCost">🪙 50</span>
+    <!-- Вкладка 3: Реферали -->
+    <div id="tab-friends" class="tab-content">
+        <div class="page-padding">
+            <h2>👥 Друзі</h2>
+            <p style="color: var(--hint-color);">Запрошуйте друзів та отримуйте % від їхніх кліків!</p>
+            <div class="card">
+                <h3>Твоє посилання:</h3>
+                <p style="word-break: break-all; color: var(--button-color);">https://t.me/your_bot?start=12345</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Вкладка 4: Гаманець -->
+    <div id="tab-wallet" class="tab-content">
+        <div class="page-padding">
+            <h2>👛 Гаманець</h2>
+            <p style="color: var(--hint-color);">Підключіть свій TON гаманець для виводу балів.</p>
+            <button class="upgrade-btn" style="margin-top: 20px;">Connect TON Wallet</button>
+        </div>
+    </div>
+
+    <!-- Нижня навігаційна панель -->
+    <nav class="navbar">
+        <button class="nav-item active" onclick="switchTab('tab-game', this)">
+            <span class="icon">🎮</span>
+            <span>Гра</span>
         </button>
-    </div>
+        <button class="nav-item" onclick="switchTab('tab-tasks', this)">
+            <span class="icon">📋</span>
+            <span>Завдання</span>
+        </button>
+        <button class="nav-item" onclick="switchTab('tab-friends', this)">
+            <span class="icon">👥</span>
+            <span>Друзі</span>
+        </button>
+        <button class="nav-item" onclick="switchTab('tab-wallet', this)">
+            <span class="icon">👛</span>
+            <span>Гаманець</span>
+        </button>
+    </nav>
 
     <script>
         // Ініціалізація Telegram Web App
         let tg = window.Telegram.WebApp;
-        tg.expand(); // Розгортаємо на весь екран
+        tg.expand();
 
         let score = parseInt(localStorage.getItem('clicker_score')) || 0;
         let clickPower = parseInt(localStorage.getItem('clicker_power')) || 1;
         let upgradeCost = parseInt(localStorage.getItem('clicker_cost')) || 50;
 
         const scoreEl = document.getElementById('score');
-        const coinBtn = document.getElementById('coinBtn');
+        const clickBtn = document.getElementById('clickBtn');
         const upgradeBtn = document.getElementById('upgradeBtn');
         const upgradeCostEl = document.getElementById('upgradeCost');
 
@@ -165,28 +294,25 @@
             upgradeCostEl.innerText = `🪙 ${upgradeCost}`;
             upgradeBtn.disabled = score < upgradeCost;
             
-            // Зберігаємо у браузері користувача
             localStorage.setItem('clicker_score', score);
             localStorage.setItem('clicker_power', clickPower);
             localStorage.setItem('clicker_cost', upgradeCost);
         }
 
-        // Клік по монеті
-        coinBtn.addEventListener('click', (event) => {
+        // Клік по фото
+        clickBtn.addEventListener('click', (event) => {
             score += clickPower;
             updateUI();
 
-            // Вібрація в Telegram (якщо підтримується телефоном)
             if (tg.HapticFeedback) {
                 tg.HapticFeedback.impactOccurred('medium');
             }
 
-            // Створюємо анімацію числа що летить
             createFloatingText(event);
         });
 
         function createFloatingText(event) {
-            const rect = coinBtn.getBoundingClientRect();
+            const rect = clickBtn.getBoundingClientRect();
             const x = event.clientX || (rect.left + rect.width / 2);
             const y = event.clientY || (rect.top + rect.height / 2);
 
@@ -205,7 +331,7 @@
             if (score >= upgradeCost) {
                 score -= upgradeCost;
                 clickPower += 1;
-                upgradeCost = Math.floor(upgradeCost * 2.25); // Збільшуємо вартість наступного апгрейду
+                upgradeCost = Math.floor(upgradeCost * 2.25);
 
                 if (tg.HapticFeedback) {
                     tg.HapticFeedback.notificationOccurred('success');
@@ -215,7 +341,23 @@
             }
         }
 
-        // Початкове оновлення інтерфейсу
+        // Перемикання вкладок через меню
+        function switchTab(tabId, btnElement) {
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            document.querySelectorAll('.nav-item').forEach(btn => {
+                btn.classList.remove('active');
+            });
+
+            document.getElementById(tabId).classList.add('active');
+            btnElement.classList.add('active');
+
+            if (tg.HapticFeedback) {
+                tg.HapticFeedback.selectionChanged();
+            }
+        }
+
         updateUI();
     </script>
 </body>
