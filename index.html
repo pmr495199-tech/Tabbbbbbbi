@@ -66,28 +66,27 @@
             margin-top: 5px;
         }
 
-        /* Клікер із фото Зеленського */
+        /* Клікер з PNG зображенням */
         .clicker-container {
             display: flex;
             align-items: center;
             justify-content: center;
             flex-grow: 1;
+            width: 100%;
         }
 
-        .avatar-button {
-            width: 200px;
-            height: 200px;
-            border-radius: 50%;
-            object-fit: cover;
-            border: 4px solid var(--button-color);
-            box-shadow: 0 10px 30px rgba(36, 129, 204, 0.4);
+        .zelensky-png {
+            height: 300px;
+            max-height: 45vh;
+            object-fit: contain;
             cursor: pointer;
-            transition: transform 0.1s ease, box-shadow 0.1s ease;
+            filter: drop-shadow(0 10px 20px rgba(0, 0, 0, 0.4));
+            transition: transform 0.08s ease;
+            -webkit-tap-highlight-color: transparent;
         }
 
-        .avatar-button:active {
-            transform: scale(0.92);
-            box-shadow: 0 5px 15px rgba(36, 129, 204, 0.3);
+        .zelensky-png:active {
+            transform: scale(0.93);
         }
 
         .upgrade-section {
@@ -120,7 +119,7 @@
         /* Анімація числа при кліку */
         .floating-text {
             position: absolute;
-            font-size: 26px;
+            font-size: 28px;
             font-weight: bold;
             color: #2481cc;
             animation: floatUp 0.8s ease-out forwards;
@@ -138,7 +137,7 @@
             }
         }
 
-        /* Інші сторінки */
+        /* Сторінки меню */
         .page-padding {
             padding: 20px;
             width: 100%;
@@ -205,11 +204,11 @@
         </div>
 
         <div class="clicker-container">
-            <!-- Фото Володимира Зеленського -->
+            <!-- Зображення Володимира Зеленського без фону (PNG) -->
             <img 
-                src="https://upload.wikimedia.org/wikipedia/commons/9/9c/Volodymyr_Zelensky_Official_portrait.jpg" 
+                src="https://pngimg.com/uploads/zelensky/zelensky_PNG105197.png" 
                 alt="Volodymyr Zelensky" 
-                class="avatar-button" 
+                class="zelensky-png" 
                 id="clickBtn"
             >
         </div>
@@ -299,7 +298,7 @@
             localStorage.setItem('clicker_cost', upgradeCost);
         }
 
-        // Клік по фото
+        // Клік по зображенню
         clickBtn.addEventListener('click', (event) => {
             score += clickPower;
             updateUI();
@@ -341,7 +340,7 @@
             }
         }
 
-        // Перемикання вкладок через меню
+        // Перемикання вкладок
         function switchTab(tabId, btnElement) {
             document.querySelectorAll('.tab-content').forEach(tab => {
                 tab.classList.remove('active');
