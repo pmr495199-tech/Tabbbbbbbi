@@ -19,6 +19,7 @@
         body {
             margin: 0;
             padding: 0;
+            /* Фронтове зображення */
             background: linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.6)), url('1792533735065.jpg') no-repeat center center fixed;
             background-size: cover;
             color: var(--text-color);
@@ -32,9 +33,9 @@
             -webkit-user-select: none;
         }
 
-        /* Шапка з профілем Telegram та балансом */
+        /* Шапка з аватаром з Telegram та ім'ям */
         header {
-            padding: 12px 16px 6px 16px;
+            padding: 12px 16px 0 16px;
             display: flex;
             align-items: center;
             justify-content: space-between;
@@ -92,7 +93,7 @@
             letter-spacing: 0.5px;
         }
 
-        /* Модальне вікно вибору мови при першому вході */
+        /* Модальне вікно вибору мови для нових гравців */
         .language-modal {
             position: fixed;
             top: 0;
@@ -164,11 +165,11 @@
         }
 
         /* Верхня частина з балансом */
-        .header-score {
+        .header {
             text-align: center;
             margin-top: 10px;
             background: rgba(0, 0, 0, 0.4);
-            padding: 8px 20px;
+            padding: 8px 22px;
             border-radius: 20px;
             backdrop-filter: blur(5px);
         }
@@ -276,7 +277,7 @@
             backdrop-filter: blur(10px);
         }
 
-        /* Нижнє навігаційне меню */
+        /* Нижня навігаційна панель */
         .navbar {
             position: fixed;
             bottom: 0;
@@ -337,9 +338,7 @@
     <div id="languageModal" class="language-modal hidden">
         <div class="lang-modal-card">
             <h2>Оберіть мову / Выберите язык</h2>
-            <p style="color: var(--hint-color); font-size: 13px; margin-top: 6px; margin-bottom: 16px;">
-                Можна змінити пізніше в налаштуваннях
-            </p>
+            <p style="color: var(--hint-color); font-size: 13px; margin-top: 6px; margin-bottom: 16px;">Можна змінити пізніше в налаштуваннях</p>
             <button class="lang-option-btn" onclick="selectInitialLanguage('uk')">
                 <span>🇺🇦</span> Українська
             </button>
@@ -351,7 +350,7 @@
 
     <!-- Вкладка 1: Головна гра -->
     <div id="tab-game" class="tab-content active">
-        <div class="header-score">
+        <div class="header">
             <div class="score-title" id="txt-score-title">Баланс балів</div>
             <div class="score-value" id="score">0</div>
         </div>
@@ -523,9 +522,10 @@
         const upgradeCostEl = document.getElementById('upgradeCost');
         const languageModal = document.getElementById('languageModal');
 
+        // Перевірка при першому запуску
         if (!currentLang) {
             languageModal.classList.remove('hidden');
-            currentLang = 'uk';
+            currentLang = 'uk'; // Мова за замовчуванням
         } else {
             applyLanguage(currentLang);
         }
@@ -572,6 +572,4 @@
             document.getElementById('txt-settings-lang-title').innerText = t.settingsLangTitle;
         }
 
-        function updateUI() {
-            scoreEl.innerText = score;
-            upgr
+        function updateU
