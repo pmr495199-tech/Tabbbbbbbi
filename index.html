@@ -2,7 +2,7 @@
 <html lang="uk">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Telegram Mini App Clicker</title>
     <!-- Підключаємо офіційний скрипт Telegram Web App -->
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
@@ -19,7 +19,6 @@
         body {
             margin: 0;
             padding: 0;
-            /* Фронтове зображення */
             background: linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.6)), url('1792533735065.jpg') no-repeat center center fixed;
             background-size: cover;
             color: var(--text-color);
@@ -95,7 +94,7 @@
             align-items: center;
             justify-content: space-between;
             flex-grow: 1;
-            padding-bottom: 70px; /* Місце під навігаційне меню */
+            padding-bottom: 70px;
             box-sizing: border-box;
             overflow-y: auto;
         }
@@ -135,7 +134,6 @@
             justify-content: center;
             flex-grow: 1;
             width: 100%;
-            touch-action: none; /* Забороняємо браузерні жести на клікері для кращого тапу */
         }
 
         .character-png {
@@ -146,7 +144,7 @@
             filter: drop-shadow(0 10px 20px rgba(0, 0, 0, 0.6));
             transition: transform 0.08s ease;
             -webkit-tap-highlight-color: transparent;
-            touch-action: none;
+            touch-action: manipulation;
         }
 
         .character-png:active {
@@ -189,6 +187,7 @@
             text-shadow: 0 2px 8px rgba(0,0,0,0.8);
             animation: floatUp 0.8s ease-out forwards;
             pointer-events: none;
+            z-index: 999;
         }
 
         @keyframes floatUp {
@@ -285,7 +284,6 @@
         </div>
 
         <div class="clicker-container">
-            <!-- Персонаж 1792533531052.png -->
             <img 
                 src="1792533531052.png" 
                 alt="Character" 
@@ -429,10 +427,6 @@
         let clickPower = parseInt(localStorage.getItem('clicker_power')) || 1;
         let upgradeCost = parseInt(localStorage.getItem('clicker_cost')) || 50;
 
-        // Зберігаємо активні унікальні пальці (до 4 максимум)
-        const activePointers = new Set();
-        const MAX_POINTERS = 4;
-
         const scoreEl = document.getElementById('score');
         const clickBtn = document.getElementById('clickBtn');
         const upgradeBtn = document.getElementById('upgradeBtn');
@@ -442,7 +436,7 @@
         // Перевірка при першому запуску
         if (!currentLang) {
             languageModal.classList.remove('hidden');
-            currentLang = 'uk'; // Мова за замовчуванням
+            currentLang = 'uk';
         } else {
             applyLanguage(currentLang);
         }
@@ -499,45 +493,49 @@
             localStorage.setItem('clicker_cost', upgradeCost);
         }
 
-        // Обробник мультитачу через Pointer Events
-        clickBtn.addEventListener('pointerdown', (event) => {
-            // Перевіряємо, чи цей палець вже додано, або чи не перевищено ліміт у 4 пальці
-            if (activePointers.has(event.pointerId)) return;
+        // ПІДТРИМКА МУЛЬТИТАЧУ ДО 4 ПАЛЬЦІВ
+        clickBtn.addEventListener('touchstart', (e) => {
+            e.preventDefault(); // Запобігаємо стандартному зуму та подвійному кліку
+
+            // Отримуємо тільки нові дотики (пальці, що щойно торкнулися екрану)
+            const touches = e.changedTouches;
+            const maxAllowed = 4;
             
-            if (activePointers.size >= MAX_POINTERS) {
-                return; // Ігноруємо пальці, якщо вже є 4 активні
+            // Рахуємо скільки пальців зараз на картинці, але не більше 4
+            const countToProcess = Math.min(touches.length, maxAllowed);
+
+            for (let i = 0; i < countToProcess; i++) {
+                const touch = touches[i];
+                score += clickPower;
+
+                if (tg.HapticFeedback) {
+                    tg.HapticFeedback.impactOccurred('medium');
+                }
+
+                createFloatingText(touch.clientX, touch.clientY);
             }
 
-            activePointers.add(event.pointerId);
-
-            // Нараховуємо бали
-            score += clickPower;
             updateUI();
+        }, { passive: false });
 
-            // Вібрація (якщо підтримується Telegram)
-            if (tg.HapticFeedback) {
-                tg.HapticFeedback.impactOccurred('medium');
+        // Фолбек для ПК (звичайна мишка)
+        clickBtn.addEventListener('click', (e) => {
+            if (e.pointerType === 'mouse') {
+                score += clickPower;
+                if (tg.HapticFeedback) {
+                    tg.HapticFeedback.impactOccurred('medium');
+                }
+                createFloatingText(e.clientX, e.clientY);
+                updateUI();
             }
-
-            // Створюємо анімацію числа у точці торкання конкретного пальця
-            createFloatingText(event.clientX, event.clientY);
         });
 
-        // Видаляємо палець з обліку, коли його відпустили
-        ['pointerup', 'pointercancel', 'pointerleave'].forEach(eventName => {
-            clickBtn.addEventListener(eventName, (event) => {
-                activePointers.delete(event.pointerId);
-            });
-        });
-
-        function createFloatingText(clientX, clientY) {
+        function createFloatingText(x, y) {
             const el = document.createElement('div');
             el.className = 'floating-text';
             el.innerText = `+${clickPower}`;
-            
-            // Зміщуємо координати відносно центру торкання
-            el.style.left = `${clientX - 15}px`;
-            el.style.top = `${clientY - 20}px`;
+            el.style.left = `${x - 15}px`;
+            el.style.top = `${y - 20}px`;
 
             document.body.appendChild(el);
             setTimeout(() => el.remove(), 800);
@@ -560,4 +558,11 @@
 
         // Перемикання вкладок
         function switchTab(tabId, btnElement) {
-            document.querySelectorA
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            document.querySelectorAll('.nav-item').forEach(btn => {
+                btn.classList.remove('active');
+            });
+
+            document.getE
