@@ -2,24 +2,26 @@
 <html lang="uk">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <title>Telegram Mini App Clicker</title>
     <!-- Підключаємо офіційний скрипт Telegram Web App -->
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         :root {
-            --bg-color: var(--tg-theme-bg-color, #121212);
-            --text-color: var(--tg-theme-text-color, #ffffff);
-            --hint-color: var(--tg-theme-hint-color, #aaaaaa);
-            --button-color: var(--tg-theme-button-color, #2481cc);
-            --button-text-color: var(--tg-theme-button-text-color, #ffffff);
-            --secondary-bg: var(--tg-theme-secondary-bg-color, rgba(30, 30, 30, 0.85));
+            --bg-color: #121212;
+            --text-color: #ffffff;
+            --hint-color: #aaaaaa;
+            --button-color: #d4a373;
+            --button-text-color: #1a1a1a;
+            --secondary-bg: rgba(20, 20, 20, 0.75);
+            --card-bg: rgba(35, 30, 25, 0.85);
+            --accent-gold: #f4a261;
         }
 
         body {
             margin: 0;
             padding: 0;
-            background: linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.6)), url('1792533735065.jpg') no-repeat center center fixed;
+            background: linear-gradient(rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.6)), url('1792533735065.jpg') no-repeat center center fixed;
             background-size: cover;
             color: var(--text-color);
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
@@ -32,7 +34,7 @@
             -webkit-user-select: none;
         }
 
-        /* Модальне вікно вибору мови для нових гравців */
+        /* Модальне вікно вибору мови */
         .language-modal {
             position: fixed;
             top: 0;
@@ -56,7 +58,7 @@
         }
 
         .lang-modal-card {
-            background: var(--secondary-bg);
+            background: var(--card-bg);
             padding: 25px;
             border-radius: 20px;
             width: 90%;
@@ -87,73 +89,177 @@
             transform: scale(0.96);
         }
 
-        /* Контейнер для вкладок */
+        /* Вкладки */
         .tab-content {
             display: none;
             flex-direction: column;
-            align-items: center;
-            justify-content: space-between;
             flex-grow: 1;
-            padding-bottom: 70px;
+            padding-bottom: 75px;
             box-sizing: border-box;
             overflow-y: auto;
+            position: relative;
         }
 
         .tab-content.active {
             display: flex;
         }
 
-        /* Верхня частина з балансом */
-        .header {
-            text-align: center;
-            margin-top: 20px;
-            background: rgba(0, 0, 0, 0.4);
-            padding: 10px 25px;
-            border-radius: 20px;
-            backdrop-filter: blur(5px);
+        /* Верхня панель користувача (як на скріншоті)[span_1](start_span)[span_1](end_span) */
+        .top-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 16px;
+            width: 100%;
+            box-sizing: border-box;
         }
 
-        .score-title {
-            font-size: 14px;
-            color: #ddd;
-            text-transform: uppercase;
-            letter-spacing: 1px;
+        .user-profile-badge {
+            display: flex;
+            align-items: center;
+            background: var(--secondary-bg);
+            backdrop-filter: blur(10px);
+            padding: 6px 12px 6px 6px;
+            border-radius: 30px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            gap: 8px;
         }
 
-        .score-value {
-            font-size: 42px;
+        .user-avatar {
+            width: 34px;
+            height: 34px;
+            border-radius: 50%;
+            background: #444;
+            object-fit: cover;
+        }
+
+        .user-info {
+            display: flex;
+            flex-direction: column;
+            text-align: left;
+        }
+
+        .user-name {
+            font-size: 13px;
             font-weight: bold;
-            margin-top: 2px;
-            text-shadow: 0 2px 10px rgba(0,0,0,0.5);
         }
 
-        /* Клікер з персонажем PNG */
-        .clicker-container {
+        .user-handle {
+            font-size: 10px;
+            color: var(--hint-color);
+        }
+
+        .top-right-stats {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .stat-pill {
+            background: var(--secondary-bg);
+            backdrop-filter: blur(10px);
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        /* Панель ресурсів[span_2](start_span)[span_2](end_span) */
+        .resources-bar {
+            display: flex;
+            justify-content: space-around;
+            background: var(--secondary-bg);
+            backdrop-filter: blur(12px);
+            margin: 0 16px;
+            padding: 10px 8px;
+            border-radius: 16px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+        }
+
+        .resource-item {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        /* Ігровий простір з плашками навколо персонажа[span_3](start_span)[span_3](end_span) */
+        .game-main-area {
+            position: relative;
+            flex-grow: 1;
             display: flex;
             align-items: center;
             justify-content: center;
-            flex-grow: 1;
             width: 100%;
         }
 
+        .level-badge-top {
+            position: absolute;
+            top: 15px;
+            background: var(--secondary-bg);
+            backdrop-filter: blur(8px);
+            padding: 5px 16px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            letter-spacing: 0.5px;
+        }
+
+        /* Плашки швидкого доступу навколо героя[span_4](start_span)[span_4](end_span) */
+        .floating-widget {
+            position: absolute;
+            background: var(--secondary-bg);
+            backdrop-filter: blur(10px);
+            padding: 8px 14px;
+            border-radius: 14px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            font-size: 12px;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+            transition: transform 0.1s;
+        }
+
+        .floating-widget:active {
+            transform: scale(0.95);
+        }
+
+        .widget-left-top { left: 16px; top: 25%; }
+        .widget-left-bottom { left: 16px; bottom: 20%; }
+        .widget-right-top { right: 16px; top: 25%; }
+        .widget-right-bottom { right: 16px; bottom: 20%; }
+
+        .widget-title { font-weight: bold; display: flex; align-items: center; gap: 4px; }
+        .widget-subtitle { font-size: 10px; color: var(--hint-color); margin-top: 2px; }
+
+        /* Клікер персонаж[span_5](start_span)[span_5](end_span) */
         .character-png {
-            height: 320px;
-            max-height: 48vh;
+            height: 300px;
+            max-height: 42vh;
             object-fit: contain;
             cursor: pointer;
-            filter: drop-shadow(0 10px 20px rgba(0, 0, 0, 0.6));
+            filter: drop-shadow(0 10px 20px rgba(0, 0, 0, 0.7));
             transition: transform 0.08s ease;
             -webkit-tap-highlight-color: transparent;
-            touch-action: manipulation;
         }
 
         .character-png:active {
-            transform: scale(0.92);
+            transform: scale(0.93);
         }
 
+        /* Нижня кнопка покращення */
         .upgrade-section {
             width: 100%;
-            padding: 0 20px 10px 20px;
+            padding: 0 16px 10px 16px;
             box-sizing: border-box;
         }
 
@@ -161,16 +267,16 @@
             background-color: var(--button-color);
             color: var(--button-text-color);
             border: none;
-            border-radius: 12px;
-            padding: 14px;
-            font-size: 16px;
-            font-weight: 600;
+            border-radius: 14px;
+            padding: 13px;
+            font-size: 15px;
+            font-weight: bold;
             cursor: pointer;
             width: 100%;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
         }
 
         .upgrade-btn:disabled {
@@ -178,27 +284,20 @@
             cursor: not-allowed;
         }
 
-        /* Анімація числа при кліку */
+        /* Анімація числа кліку */
         .floating-text {
             position: absolute;
-            font-size: 30px;
+            font-size: 28px;
             font-weight: bold;
             color: #ffffff;
-            text-shadow: 0 2px 8px rgba(0,0,0,0.8);
+            text-shadow: 0 2px 8px rgba(0,0,0,0.9);
             animation: floatUp 0.8s ease-out forwards;
             pointer-events: none;
-            z-index: 999;
         }
 
         @keyframes floatUp {
-            0% {
-                opacity: 1;
-                transform: translateY(0) scale(1);
-            }
-            100% {
-                opacity: 0;
-                transform: translateY(-80px) scale(1.2);
-            }
+            0% { opacity: 1; transform: translateY(0) scale(1); }
+            100% { opacity: 0; transform: translateY(-80px) scale(1.2); }
         }
 
         /* Сторінки меню */
@@ -210,27 +309,28 @@
         }
 
         .card {
-            background-color: var(--secondary-bg);
-            border-radius: 12px;
-            padding: 15px;
+            background-color: var(--card-bg);
+            border-radius: 14px;
+            padding: 16px;
             margin-top: 15px;
             text-align: left;
             backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
         }
 
-        /* Нижнє навігаційне меню */
+        /* Нижня навігаційна панель[span_6](start_span)[span_6](end_span) */
         .navbar {
             position: fixed;
             bottom: 0;
             left: 0;
             right: 0;
             height: 65px;
-            background-color: rgba(20, 20, 20, 0.9);
-            backdrop-filter: blur(10px);
+            background-color: rgba(18, 18, 18, 0.92);
+            backdrop-filter: blur(12px);
             display: flex;
             justify-content: space-around;
             align-items: center;
-            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            border-top: 1px solid rgba(255, 255, 255, 0.08);
             z-index: 100;
         }
 
@@ -240,7 +340,7 @@
             align-items: center;
             justify-content: center;
             color: var(--hint-color);
-            font-size: 10px;
+            font-size: 11px;
             background: none;
             border: none;
             cursor: pointer;
@@ -255,7 +355,7 @@
         }
 
         .nav-item.active {
-            color: var(--button-color);
+            color: var(--accent-gold);
             font-weight: bold;
         }
     </style>
@@ -266,7 +366,7 @@
     <div id="languageModal" class="language-modal hidden">
         <div class="lang-modal-card">
             <h2>Оберіть мову / Выберите язык</h2>
-            <p style="color: var(--hint-color); font-size: 14px; margin-bottom: 20px;">Можна змінити пізніше в налаштуваннях / Можно изменить позже в настройках</p>
+            <p style="color: var(--hint-color); font-size: 13px; margin-bottom: 20px;">Можна змінити пізніше в налаштуваннях</p>
             <button class="lang-option-btn" onclick="selectInitialLanguage('uk')">
                 <span>🇺🇦</span> Українська
             </button>
@@ -276,22 +376,61 @@
         </div>
     </div>
 
-    <!-- Вкладка 1: Головна гра -->
+    <!-- Вкладка 1: Дім (Головна гра) -->
     <div id="tab-game" class="tab-content active">
-        <div class="header">
-            <div class="score-title" id="txt-score-title">Баланс балів</div>
-            <div class="score-value" id="score">0</div>
+        <!-- Верхня панель (Профіль, енергія, кристали)[span_7](start_span)[span_7](end_span) -->
+        <div class="top-bar">
+            <div class="user-profile-badge">
+                <img src="https://via.placeholder.com/34" alt="Avatar" class="user-avatar" id="userAvatar">
+                <div class="user-info">
+                    <span class="user-name" id="userName">Prokop</span>
+                    <span class="user-handle" id="userHandle">@Prokop_gg</span>
+                </div>
+            </div>
+            <div class="top-right-stats">
+                <div class="stat-pill">⚡ <span id="energyValue">2</span></div>
+                <div class="stat-pill">💎 <span id="crystalValue">6</span> <span style="color: var(--accent-gold);">+</span></div>
+            </div>
         </div>
 
-        <div class="clicker-container">
-            <img 
-                src="1792533531052.png" 
-                alt="Character" 
-                class="character-png" 
-                id="clickBtn"
-            >
+        <!-- Панель ресурсів (Монети, дерева, камінь, морква)[span_8](start_span)[span_8](end_span) -->
+        <div class="resources-bar">
+            <div class="resource-item">🪙 <span id="score">1,541</span></div>
+            <div class="resource-item">🪵 <span id="woodValue">18</span></div>
+            <div class="resource-item">🪨 <span id="stoneValue">0</span></div>
+            <div class="resource-item">🥕 <span id="carrotValue">3</span></div>
         </div>
 
+        <!-- Основний екран з персонажем та віджетами[span_9](start_span)[span_9](end_span) -->
+        <div class="game-main-area">
+            <div class="level-badge-top" id="levelBadge">Level 3</div>
+
+            <!-- Додаткові віджети навколо героя[span_10](start_span)[span_10](end_span) -->
+            <div class="floating-widget widget-left-top" onclick="switchTab('tab-tasks', document.querySelectorAll('.nav-item')[1])">
+                <span class="widget-title">🎫 Pass</span>
+                <span class="widget-subtitle" id="txt-pass-lvl">рівень 5</span>
+            </div>
+
+            <div class="floating-widget widget-right-top" onclick="alert('Склад відкритий!')">
+                <span class="widget-title">📦 Склад</span>
+                <span class="widget-subtitle">21/100</span>
+            </div>
+
+            <div class="floating-widget widget-left-bottom" onclick="switchTab('tab-friends', document.querySelectorAll('.nav-item')[2])">
+                <span class="widget-title">👥 Друзі</span>
+                <span class="widget-subtitle" style="color: #4ade80;">+20%</span>
+            </div>
+
+            <div class="floating-widget widget-right-bottom" onclick="alert('Наймати помічників')">
+                <span class="widget-title">👷 Помічники</span>
+                <span class="widget-subtitle" style="color: var(--accent-gold);">Найняти</span>
+            </div>
+
+            <!-- Персонаж-клікер -->
+            <img src="1792533531052.png" alt="Character" class="character-png" id="clickBtn">
+        </div>
+
+        <!-- Кнопка покращення кліку -->
         <div class="upgrade-section">
             <button class="upgrade-btn" id="upgradeBtn" onclick="buyUpgrade()">
                 <span id="txt-upgrade-title">🚀 Подвійний клік (+1)</span>
@@ -300,43 +439,43 @@
         </div>
     </div>
 
-    <!-- Вкладка 2: Завдання -->
+    <!-- Вкладка 2: Карта / Завдання -->
     <div id="tab-tasks" class="tab-content">
         <div class="page-padding">
-            <h2 id="txt-tasks-header">📋 Завдання</h2>
+            <h2 id="txt-tasks-header">🗺️ Карта та Завдання</h2>
             <div class="card">
                 <h3 id="txt-task1-title">📢 Підписка на канал</h3>
-                <p id="txt-task1-desc" style="color: var(--hint-color); font-size: 14px;">Підпишіться на телеграм канал для отримання бонусів.</p>
+                <p id="txt-task1-desc" style="color: var(--hint-color); font-size: 13px;">Підпишіться на телеграм канал для отримання бонусів.</p>
                 <button class="upgrade-btn" style="margin-top: 10px;" id="txt-task1-btn">Отримати +500</button>
             </div>
         </div>
     </div>
 
-    <!-- Вкладка 3: Реферали -->
+    <!-- Вкладка 3: Топ / Друзі -->
     <div id="tab-friends" class="tab-content">
         <div class="page-padding">
-            <h2 id="txt-friends-header">👥 Друзі</h2>
+            <h2 id="txt-friends-header">🏆 Топ гравців & Друзі</h2>
             <p id="txt-friends-desc" style="color: var(--hint-color);">Запрошуйте друзів та отримуйте % від їхніх кліків!</p>
             <div class="card">
                 <h3 id="txt-friends-link-title">Твоє посилання:</h3>
-                <p style="word-break: break-all; color: var(--button-color);">https://t.me/your_bot?start=12345</p>
+                <p style="word-break: break-all; color: var(--accent-gold);">https://t.me/your_bot?start=12345</p>
             </div>
         </div>
     </div>
 
-    <!-- Вкладка 4: Гаманець -->
+    <!-- Вкладка 4: Івенти -->
     <div id="tab-wallet" class="tab-content">
         <div class="page-padding">
-            <h2 id="txt-wallet-header">👛 Гаманець</h2>
-            <p id="txt-wallet-desc" style="color: var(--hint-color);">Підключіть свій TON гаманець для виводу балів.</p>
-            <button class="upgrade-btn" style="margin-top: 20px;">Connect TON Wallet</button>
+            <h2 id="txt-wallet-header">⭐ Івенти</h2>
+            <p id="txt-wallet-desc" style="color: var(--hint-color);">Беріть участь у спеціальних івентах заради цінних нагород.</p>
+            <button class="upgrade-btn" style="margin-top: 20px;">Брати участь</button>
         </div>
     </div>
 
-    <!-- Вкладка 5: Налаштування -->
+    <!-- Вкладка 5: Профіль / Налаштування -->
     <div id="tab-settings" class="tab-content">
         <div class="page-padding">
-            <h2 id="txt-settings-header">⚙️ Налаштування</h2>
+            <h2 id="txt-settings-header">👤 Профіль & Налаштування</h2>
             <div class="card">
                 <h3 id="txt-settings-lang-title">Мова / Язык</h3>
                 <button class="lang-option-btn" onclick="setLanguage('uk')">
@@ -349,220 +488,75 @@
         </div>
     </div>
 
-    <!-- Нижня навігаційна панель -->
+    <!-- Нижня навігаційна панель[span_11](start_span)[span_11](end_span) -->
     <nav class="navbar">
         <button class="nav-item active" onclick="switchTab('tab-game', this)">
-            <span class="icon">🎮</span>
-            <span id="nav-game">Гра</span>
+            <span class="icon">🏠</span>
+            <span id="nav-game">Дім</span>
         </button>
         <button class="nav-item" onclick="switchTab('tab-tasks', this)">
-            <span class="icon">📋</span>
-            <span id="nav-tasks">Завдання</span>
+            <span class="icon">🗺️</span>
+            <span id="nav-tasks">Карта</span>
         </button>
         <button class="nav-item" onclick="switchTab('tab-friends', this)">
-            <span class="icon">👥</span>
-            <span id="nav-friends">Друзі</span>
+            <span class="icon">🏆</span>
+            <span id="nav-friends">Топ</span>
         </button>
         <button class="nav-item" onclick="switchTab('tab-wallet', this)">
-            <span class="icon">👛</span>
-            <span id="nav-wallet">Гаманець</span>
+            <span class="icon">⭐</span>
+            <span id="nav-wallet">Івенти</span>
         </button>
         <button class="nav-item" onclick="switchTab('tab-settings', this)">
-            <span class="icon">⚙️</span>
-            <span id="nav-settings">Налаштув.</span>
+            <span class="icon">👤</span>
+            <span id="nav-settings">Профіль</span>
         </button>
     </nav>
 
     <script>
-        // Ініціалізація Telegram Web App
         let tg = window.Telegram.WebApp;
         tg.expand();
 
-        // Словник перекладів
+        // Підтягуємо ім'я та юзернейм з Telegram, якщо доступно
+        if (tg.initDataUnsafe && tg.initDataUnsafe.user) {
+            const user = tg.initDataUnsafe.user;
+            document.getElementById('userName').innerText = user.first_name || 'Prokop';
+            document.getElementById('userHandle').innerText = user.username ? `@${user.username}` : '@Prokop_gg';
+            if (user.photo_url) {
+                document.getElementById('userAvatar').src = user.photo_url;
+            }
+        }
+
         const translations = {
             uk: {
-                scoreTitle: "Баланс балів",
                 upgradeTitle: "🚀 Подвійний клік (+1)",
-                navGame: "Гра",
-                navTasks: "Завдання",
-                navFriends: "Друзі",
-                navWallet: "Гаманець",
-                navSettings: "Налаштув.",
-                tasksHeader: "📋 Завдання",
+                navGame: "Дім",
+                navTasks: "Карта",
+                navFriends: "Топ",
+                navWallet: "Івенти",
+                navSettings: "Профіль",
+                tasksHeader: "🗺️ Карта та Завдання",
                 task1Title: "📢 Підписка на канал",
                 task1Desc: "Підпишіться на телеграм канал для отримання бонусів.",
                 task1Btn: "Отримати +500",
-                friendsHeader: "👥 Друзі",
+                friendsHeader: "🏆 Топ гравців & Друзі",
                 friendsDesc: "Запрошуйте друзів та отримуйте % від їхніх кліків!",
                 friendsLinkTitle: "Твоє посилання:",
-                walletHeader: "👛 Гаманець",
-                walletDesc: "Підключіть свій TON гаманець для виводу балів.",
-                settingsHeader: "⚙️ Налаштування",
+                walletHeader: "⭐ Івенти",
+                walletDesc: "Беріть участь у спеціальних івентах заради цінних нагород.",
+                settingsHeader: "👤 Профіль & Налаштування",
                 settingsLangTitle: "Мова / Язык"
             },
             ru: {
-                scoreTitle: "Баланс очков",
                 upgradeTitle: "🚀 Двойной клик (+1)",
-                navGame: "Игра",
-                navTasks: "Задания",
-                navFriends: "Друзья",
-                navWallet: "Кошелек",
-                navSettings: "Настройки",
-                tasksHeader: "📋 Задания",
+                navGame: "Дом",
+                navTasks: "Карта",
+                navFriends: "Топ",
+                navWallet: "Ивенты",
+                navSettings: "Профиль",
+                tasksHeader: "🗺️ Карта и Задания",
                 task1Title: "📢 Подписка на канал",
                 task1Desc: "Подпишитесь на телеграм канал для получения бонусов.",
                 task1Btn: "Получить +500",
-                friendsHeader: "👥 Друзья",
+                friendsHeader: "🏆 Топ игроков & Друзья",
                 friendsDesc: "Приглашайте друзей и получайте % от их кликов!",
-                friendsLinkTitle: "Твоя ссылка:",
-                walletHeader: "👛 Кошелек",
-                walletDesc: "Подключите свой TON кошелек для вывода очков.",
-                settingsHeader: "⚙️ Настройки",
-                settingsLangTitle: "Мова / Язык"
-            }
-        };
-
-        let currentLang = localStorage.getItem('clicker_lang') || null;
-        let score = parseInt(localStorage.getItem('clicker_score')) || 0;
-        let clickPower = parseInt(localStorage.getItem('clicker_power')) || 1;
-        let upgradeCost = parseInt(localStorage.getItem('clicker_cost')) || 50;
-
-        const scoreEl = document.getElementById('score');
-        const clickBtn = document.getElementById('clickBtn');
-        const upgradeBtn = document.getElementById('upgradeBtn');
-        const upgradeCostEl = document.getElementById('upgradeCost');
-        const languageModal = document.getElementById('languageModal');
-
-        // Перевірка при першому запуску
-        if (!currentLang) {
-            languageModal.classList.remove('hidden');
-            currentLang = 'uk';
-        } else {
-            applyLanguage(currentLang);
-        }
-
-        function selectInitialLanguage(lang) {
-            setLanguage(lang);
-            languageModal.classList.add('hidden');
-        }
-
-        function setLanguage(lang) {
-            currentLang = lang;
-            localStorage.setItem('clicker_lang', lang);
-            applyLanguage(lang);
-            
-            if (tg.HapticFeedback) {
-                tg.HapticFeedback.notificationOccurred('success');
-            }
-        }
-
-        function applyLanguage(lang) {
-            const t = translations[lang];
-            document.getElementById('txt-score-title').innerText = t.scoreTitle;
-            document.getElementById('txt-upgrade-title').innerText = t.upgradeTitle;
-            
-            document.getElementById('nav-game').innerText = t.navGame;
-            document.getElementById('nav-tasks').innerText = t.navTasks;
-            document.getElementById('nav-friends').innerText = t.navFriends;
-            document.getElementById('nav-wallet').innerText = t.navWallet;
-            document.getElementById('nav-settings').innerText = t.navSettings;
-
-            document.getElementById('txt-tasks-header').innerText = t.tasksHeader;
-            document.getElementById('txt-task1-title').innerText = t.task1Title;
-            document.getElementById('txt-task1-desc').innerText = t.task1Desc;
-            document.getElementById('txt-task1-btn').innerText = t.task1Btn;
-
-            document.getElementById('txt-friends-header').innerText = t.friendsHeader;
-            document.getElementById('txt-friends-desc').innerText = t.friendsDesc;
-            document.getElementById('txt-friends-link-title').innerText = t.friendsLinkTitle;
-
-            document.getElementById('txt-wallet-header').innerText = t.walletHeader;
-            document.getElementById('txt-wallet-desc').innerText = t.walletDesc;
-
-            document.getElementById('txt-settings-header').innerText = t.settingsHeader;
-            document.getElementById('txt-settings-lang-title').innerText = t.settingsLangTitle;
-        }
-
-        function updateUI() {
-            scoreEl.innerText = score;
-            upgradeCostEl.innerText = `🪙 ${upgradeCost}`;
-            upgradeBtn.disabled = score < upgradeCost;
-            
-            localStorage.setItem('clicker_score', score);
-            localStorage.setItem('clicker_power', clickPower);
-            localStorage.setItem('clicker_cost', upgradeCost);
-        }
-
-        // ПІДТРИМКА МУЛЬТИТАЧУ ДО 4 ПАЛЬЦІВ
-        clickBtn.addEventListener('touchstart', (e) => {
-            e.preventDefault(); // Запобігаємо стандартному зуму та подвійному кліку
-
-            // Отримуємо тільки нові дотики (пальці, що щойно торкнулися екрану)
-            const touches = e.changedTouches;
-            const maxAllowed = 4;
-            
-            // Рахуємо скільки пальців зараз на картинці, але не більше 4
-            const countToProcess = Math.min(touches.length, maxAllowed);
-
-            for (let i = 0; i < countToProcess; i++) {
-                const touch = touches[i];
-                score += clickPower;
-
-                if (tg.HapticFeedback) {
-                    tg.HapticFeedback.impactOccurred('medium');
-                }
-
-                createFloatingText(touch.clientX, touch.clientY);
-            }
-
-            updateUI();
-        }, { passive: false });
-
-        // Фолбек для ПК (звичайна мишка)
-        clickBtn.addEventListener('click', (e) => {
-            if (e.pointerType === 'mouse') {
-                score += clickPower;
-                if (tg.HapticFeedback) {
-                    tg.HapticFeedback.impactOccurred('medium');
-                }
-                createFloatingText(e.clientX, e.clientY);
-                updateUI();
-            }
-        });
-
-        function createFloatingText(x, y) {
-            const el = document.createElement('div');
-            el.className = 'floating-text';
-            el.innerText = `+${clickPower}`;
-            el.style.left = `${x - 15}px`;
-            el.style.top = `${y - 20}px`;
-
-            document.body.appendChild(el);
-            setTimeout(() => el.remove(), 800);
-        }
-
-        // Покупка покращення
-        function buyUpgrade() {
-            if (score >= upgradeCost) {
-                score -= upgradeCost;
-                clickPower += 1;
-                upgradeCost = Math.floor(upgradeCost * 2.25);
-
-                if (tg.HapticFeedback) {
-                    tg.HapticFeedback.notificationOccurred('success');
-                }
-
-                updateUI();
-            }
-        }
-
-        // Перемикання вкладок
-        function switchTab(tabId, btnElement) {
-            document.querySelectorAll('.tab-content').forEach(tab => {
-                tab.classList.remove('active');
-            });
-            document.querySelectorAll('.nav-item').forEach(btn => {
-                btn.classList.remove('active');
-            });
-
-            document.getE
+                friendsLinkTitle: "Твоя ссыл
