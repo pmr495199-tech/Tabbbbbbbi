@@ -1,578 +1,414 @@
+```html
 <!DOCTYPE html>
-<html lang="uk">
+<html lang="en" class="dark">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>Telegram Mini App Clicker</title>
-    <!-- Підключаємо офіційний скрипт Telegram Web App -->
-    <script src="https://telegram.org/js/telegram-web-app.js"></script>
-    <style>
-        :root {
-            --bg-color: #121212;
-            --text-color: #ffffff;
-            --hint-color: #aaaaaa;
-            --button-color: #d4a373;
-            --button-text-color: #1a1a1a;
-            --secondary-bg: rgba(20, 20, 20, 0.85);
-            --card-bg: rgba(35, 30, 25, 0.9);
-            --accent-gold: #f4a261;
-        }
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Crypto Clicker Telegram Mini App</title>
+  
+  <!-- Telegram WebApp SDK -->
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  
+  <!-- FontAwesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <!-- Google Fonts: Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
 
-        body {
-            margin: 0;
-            padding: 0;
-            background: linear-gradient(rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.6)), url('1792533735065.jpg') no-repeat center center fixed;
-            background-size: cover;
-            color: var(--text-color);
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-            display: flex;
-            flex-direction: column;
-            height: 100vh;
-            height: 100dvh;
-            overflow: hidden;
-            user-select: none;
-            -webkit-user-select: none;
-        }
-
-        /* Модальне вікно вибору мови */
-        .language-modal {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.85);
-            backdrop-filter: blur(8px);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            z-index: 1000;
-            padding: 20px;
-            box-sizing: border-box;
-            text-align: center;
-        }
-
-        .language-modal.hidden {
-            display: none;
-        }
-
-        .lang-modal-card {
-            background: var(--card-bg);
-            padding: 25px;
-            border-radius: 20px;
-            width: 90%;
-            max-width: 320px;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-        }
-
-        .lang-option-btn {
-            background-color: var(--button-color);
-            color: var(--button-text-color);
-            border: none;
-            border-radius: 12px;
-            padding: 14px;
-            font-size: 16px;
-            font-weight: 600;
-            cursor: pointer;
-            width: 100%;
-            margin-top: 12px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-            transition: transform 0.1s ease;
-        }
-
-        .lang-option-btn:active {
-            transform: scale(0.96);
-        }
-
-        /* Вкладки */
-        .tab-content {
-            display: none;
-            flex-direction: column;
-            flex-grow: 1;
-            padding-bottom: 75px;
-            box-sizing: border-box;
-            overflow-y: auto;
-            position: relative;
-            z-index: 1;
-        }
-
-        .tab-content.active {
-            display: flex;
-        }
-
-        /* Верхня панель користувача */
-        .top-bar {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 12px 16px;
-            width: 100%;
-            box-sizing: border-box;
-            z-index: 10;
-        }
-
-        .user-profile-badge {
-            display: flex;
-            align-items: center;
-            background: var(--secondary-bg);
-            backdrop-filter: blur(10px);
-            padding: 6px 12px 6px 6px;
-            border-radius: 30px;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            gap: 8px;
-        }
-
-        .user-avatar {
-            width: 34px;
-            height: 34px;
-            border-radius: 50%;
-            background: #444;
-            object-fit: cover;
-        }
-
-        .user-info {
-            display: flex;
-            flex-direction: column;
-            text-align: left;
-        }
-
-        .user-name {
-            font-size: 13px;
-            font-weight: bold;
-        }
-
-        .user-handle {
-            font-size: 10px;
-            color: var(--hint-color);
-        }
-
-        .top-right-stats {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .stat-pill {
-            background: var(--secondary-bg);
-            backdrop-filter: blur(10px);
-            padding: 6px 12px;
-            border-radius: 20px;
-            font-size: 13px;
-            font-weight: bold;
-            display: flex;
-            align-items: center;
-            gap: 5px;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-        }
-
-        /* Панель ресурсів */
-        .resources-bar {
-            display: flex;
-            justify-content: space-around;
-            background: var(--secondary-bg);
-            backdrop-filter: blur(12px);
-            margin: 0 16px;
-            padding: 10px 8px;
-            border-radius: 16px;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
-            z-index: 10;
-        }
-
-        .resource-item {
-            display: flex;
-            align-items: center;
-            gap: 5px;
-            font-size: 13px;
-            font-weight: 600;
-        }
-
-        /* Ігровий простір з плашками навколо персонажа */
-        .game-main-area {
-            position: relative;
-            flex-grow: 1;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            width: 100%;
-        }
-
-        .level-badge-top {
-            position: absolute;
-            top: 10px;
-            background: var(--secondary-bg);
-            backdrop-filter: blur(8px);
-            padding: 5px 16px;
-            border-radius: 20px;
-            font-size: 12px;
-            font-weight: bold;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            letter-spacing: 0.5px;
-            z-index: 5;
-        }
-
-        /* Плашки швидкого доступу навколо героя */
-        .floating-widget {
-            position: absolute;
-            background: var(--secondary-bg);
-            backdrop-filter: blur(10px);
-            padding: 8px 14px;
-            border-radius: 14px;
-            border: 1px solid rgba(255, 255, 255, 0.15);
-            font-size: 12px;
-            display: flex;
-            flex-direction: column;
-            align-items: flex-start;
-            cursor: pointer;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.4);
-            transition: transform 0.1s;
-            z-index: 20;
-        }
-
-        .floating-widget:active {
-            transform: scale(0.92);
-        }
-
-        .widget-left-top { left: 16px; top: 20%; }
-        .widget-left-bottom { left: 16px; bottom: 15%; }
-        .widget-right-top { right: 16px; top: 20%; }
-        .widget-right-bottom { right: 16px; bottom: 15%; }
-
-        .widget-title { font-weight: bold; display: flex; align-items: center; gap: 4px; pointer-events: none; }
-        .widget-subtitle { font-size: 10px; color: var(--hint-color); margin-top: 2px; pointer-events: none; }
-
-        /* Клікер персонаж */
-        .character-png {
-            height: 290px;
-            max-height: 40vh;
-            object-fit: contain;
-            cursor: pointer;
-            filter: drop-shadow(0 10px 20px rgba(0, 0, 0, 0.7));
-            transition: transform 0.08s ease;
-            -webkit-tap-highlight-color: transparent;
-            z-index: 10;
-        }
-
-        .character-png:active {
-            transform: scale(0.93);
-        }
-
-        /* Нижня кнопка покращення */
-        .upgrade-section {
-            width: 100%;
-            padding: 0 16px 10px 16px;
-            box-sizing: border-box;
-            z-index: 10;
-        }
-
-        .upgrade-btn {
-            background-color: var(--button-color);
-            color: var(--button-text-color);
-            border: none;
-            border-radius: 14px;
-            padding: 13px;
-            font-size: 15px;
-            font-weight: bold;
-            cursor: pointer;
-            width: 100%;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
-        }
-
-        .upgrade-btn:active {
-            transform: scale(0.98);
-        }
-
-        .upgrade-btn:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-            transform: none;
-        }
-
-        /* Анімація числа кліку */
-        .floating-text {
-            position: absolute;
-            font-size: 28px;
-            font-weight: bold;
-            color: #ffffff;
-            text-shadow: 0 2px 8px rgba(0,0,0,0.9);
-            animation: floatUp 0.8s ease-out forwards;
-            pointer-events: none;
-            z-index: 100;
-        }
-
-        @keyframes floatUp {
-            0% { opacity: 1; transform: translateY(0) scale(1); }
-            100% { opacity: 0; transform: translateY(-80px) scale(1.2); }
-        }
-
-        /* Сторінки меню */
-        .page-padding {
-            padding: 20px;
-            width: 100%;
-            box-sizing: border-box;
-            text-align: center;
-        }
-
-        .card {
-            background-color: var(--card-bg);
-            border-radius: 14px;
-            padding: 16px;
-            margin-top: 15px;
-            text-align: left;
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.08);
-        }
-
-        /* Нижня навігаційна панель */
-        .navbar {
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            height: 65px;
-            background-color: rgba(18, 18, 18, 0.95);
-            backdrop-filter: blur(12px);
-            display: flex;
-            justify-content: space-around;
-            align-items: center;
-            border-top: 1px solid rgba(255, 255, 255, 0.08);
-            z-index: 500;
-        }
-
-        .nav-item {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            color: var(--hint-color);
-            font-size: 11px;
-            background: none;
-            border: none;
-            cursor: pointer;
-            width: 20%;
-            height: 100%;
-            transition: color 0.2s ease;
-        }
-
-        .nav-item .icon {
-            font-size: 18px;
-            margin-bottom: 3px;
-            pointer-events: none;
-        }
-
-        .nav-item span {
-            pointer-events: none;
-        }
-
-        .nav-item.active {
-            color: var(--accent-gold);
-            font-weight: bold;
-        }
-    </style>
-</head>
-<body>
-
-    <!-- Вікно вибору мови при першому вході -->
-    <div id="languageModal" class="language-modal hidden">
-        <div class="lang-modal-card">
-            <h2>Оберіть мову / Выберите язык</h2>
-            <p style="color: var(--hint-color); font-size: 13px; margin-bottom: 20px;">Можна змінити пізніше в налаштуваннях</p>
-            <button class="lang-option-btn" onclick="selectInitialLanguage('uk')">
-                <span>🇺🇦</span> Українська
-            </button>
-            <button class="lang-option-btn" onclick="selectInitialLanguage('ru')">
-                <span>🇷🇺</span> Русский
-            </button>
-        </div>
-    </div>
-
-    <!-- Вкладка 1: Дім (Головна гра) -->
-    <div id="tab-game" class="tab-content active">
-        <!-- Верхня панель -->
-        <div class="top-bar">
-            <div class="user-profile-badge">
-                <img src="https://via.placeholder.com/34" alt="Avatar" class="user-avatar" id="userAvatar">
-                <div class="user-info">
-                    <span class="user-name" id="userName">Prokop</span>
-                    <span class="user-handle" id="userHandle">@Prokop_gg</span>
-                </div>
-            </div>
-            <div class="top-right-stats">
-                <div class="stat-pill">⚡ <span id="energyValue">2</span></div>
-                <div class="stat-pill">💎 <span id="crystalValue">6</span> <span style="color: var(--accent-gold);">+</span></div>
-            </div>
-        </div>
-
-        <!-- Панель ресурсів -->
-        <div class="resources-bar">
-            <div class="resource-item">🪙 <span id="score">1,541</span></div>
-            <div class="resource-item">🪵 <span id="woodValue">18</span></div>
-            <div class="resource-item">🪨 <span id="stoneValue">0</span></div>
-            <div class="resource-item">🥕 <span id="carrotValue">3</span></div>
-        </div>
-
-        <!-- Основний екран з персонажем та віджетами -->
-        <div class="game-main-area">
-            <div class="level-badge-top" id="levelBadge">Level 3</div>
-
-            <!-- Додаткові віджети навколо героя -->
-            <div class="floating-widget widget-left-top" onclick="switchTab('tab-tasks', 'nav-btn-tasks')">
-                <span class="widget-title">🎫 Pass</span>
-                <span class="widget-subtitle" id="txt-pass-lvl">рівень 5</span>
-            </div>
-
-            <div class="floating-widget widget-right-top" onclick="alert('Склад відкритий!')">
-                <span class="widget-title">📦 Склад</span>
-                <span class="widget-subtitle">21/100</span>
-            </div>
-
-            <div class="floating-widget widget-left-bottom" onclick="switchTab('tab-friends', 'nav-btn-friends')">
-                <span class="widget-title">👥 Друзі</span>
-                <span class="widget-subtitle" style="color: #4ade80;">+20%</span>
-            </div>
-
-            <div class="floating-widget widget-right-bottom" onclick="alert('Наймати помічників')">
-                <span class="widget-title">👷 Помічники</span>
-                <span class="widget-subtitle" style="color: var(--accent-gold);">Найняти</span>
-            </div>
-
-            <!-- Персонаж-клікер -->
-            <img src="1792533531052.png" alt="Character" class="character-png" id="clickBtn">
-        </div>
-
-        <!-- Кнопка покращення кліку -->
-        <div class="upgrade-section">
-            <button class="upgrade-btn" id="upgradeBtn" onclick="buyUpgrade()">
-                <span id="txt-upgrade-title">🚀 Подвійний клік (+1)</span>
-                <span id="upgradeCost">🪙 50</span>
-            </button>
-        </div>
-    </div>
-
-    <!-- Вкладка 2: Карта / Завдання -->
-    <div id="tab-tasks" class="tab-content">
-        <div class="page-padding">
-            <h2 id="txt-tasks-header">🗺️ Карта та Завдання</h2>
-            <div class="card">
-                <h3 id="txt-task1-title">📢 Підписка на канал</h3>
-                <p id="txt-task1-desc" style="color: var(--hint-color); font-size: 13px;">Підпишіться на телеграм канал для отримання бонусів.</p>
-                <button class="upgrade-btn" style="margin-top: 10px;" id="txt-task1-btn" onclick="alert('Бонус отримано!')">Отримати +500</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Вкладка 3: Топ / Друзі -->
-    <div id="tab-friends" class="tab-content">
-        <div class="page-padding">
-            <h2 id="txt-friends-header">🏆 Топ гравців & Друзі</h2>
-            <p id="txt-friends-desc" style="color: var(--hint-color);">Запрошуйте друзів та отримуйте % від їхніх кліків!</p>
-            <div class="card">
-                <h3 id="txt-friends-link-title">Твоє посилання:</h3>
-                <p style="word-break: break-all; color: var(--accent-gold);">https://t.me/your_bot?start=12345</p>
-            </div>
-        </div>
-    </div>
-
-    <!-- Вкладка 4: Івенти -->
-    <div id="tab-wallet" class="tab-content">
-        <div class="page-padding">
-            <h2 id="txt-wallet-header">⭐ Івенти</h2>
-            <p id="txt-wallet-desc" style="color: var(--hint-color);">Беріть участь у спеціальних івентах заради цінних нагород.</p>
-            <button class="upgrade-btn" style="margin-top: 20px;" onclick="alert('Ви зареєстровані в івенті!')">Брати участь</button>
-        </div>
-    </div>
-
-    <!-- Вкладка 5: Профіль / Налаштування -->
-    <div id="tab-settings" class="tab-content">
-        <div class="page-padding">
-            <h2 id="txt-settings-header">👤 Профіль & Налаштування</h2>
-            <div class="card">
-                <h3 id="txt-settings-lang-title">Мова / Язык</h3>
-                <button class="lang-option-btn" onclick="setLanguage('uk')">
-                    <span>🇺🇦</span> Українська
-                </button>
-                <button class="lang-option-btn" onclick="setLanguage('ru')">
-                    <span>🇷🇺</span> Русский
-                </button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Нижня навігаційна панель -->
-    <nav class="navbar">
-        <button id="nav-btn-game" class="nav-item active" onclick="switchTab('tab-game', 'nav-btn-game')">
-            <span class="icon">🏠</span>
-            <span id="nav-game">Дім</span>
-        </button>
-        <button id="nav-btn-tasks" class="nav-item" onclick="switchTab('tab-tasks', 'nav-btn-tasks')">
-            <span class="icon">🗺️</span>
-            <span id="nav-tasks">Карта</span>
-        </button>
-        <button id="nav-btn-friends" class="nav-item" onclick="switchTab('tab-friends', 'nav-btn-friends')">
-            <span class="icon">🏆</span>
-            <span id="nav-friends">Топ</span>
-        </button>
-        <button id="nav-btn-wallet" class="nav-item" onclick="switchTab('tab-wallet', 'nav-btn-wallet')">
-            <span class="icon">⭐</span>
-            <span id="nav-wallet">Івенти</span>
-        </button>
-        <button id="nav-btn-settings" class="nav-item" onclick="switchTab('tab-settings', 'nav-btn-settings')">
-            <span class="icon">👤</span>
-            <span id="nav-settings">Профіль</span>
-        </button>
-    </nav>
-
-    <script>
-        let tg = window.Telegram ? window.Telegram.WebApp : null;
-        if (tg) tg.expand();
-
-        // Підтягуємо дані Telegram
-        if (tg && tg.initDataUnsafe && tg.initDataUnsafe.user) {
-            const user = tg.initDataUnsafe.user;
-            document.getElementById('userName').innerText = user.first_name || 'Prokop';
-            document.getElementById('userHandle').innerText = user.username ? `@${user.username}` : '@Prokop_gg';
-            if (user.photo_url) {
-                document.getElementById('userAvatar').src = user.photo_url;
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+          },
+          colors: {
+            telegram: {
+              bg: '#0f172a',
+              card: 'rgba(30, 41, 59, 0.7)',
+              accent: '#38bdf8',
+              gold: '#f59e0b',
+              purple: '#8b5cf6'
             }
+          },
+          animation: {
+            'pulse-fast': 'pulse 1s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+            'bounce-short': 'bounce 0.5s ease-in-out 1',
+            'float-up': 'floatUp 0.8s ease-out forwards',
+          },
+          keyframes: {
+            floatUp: {
+              '0%': { opacity: '1', transform: 'translateY(0) scale(1)' },
+              '100%': { opacity: '0', transform: 'translateY(-80px) scale(1.2)' },
+            }
+          }
         }
+      }
+    }
+  </script>
 
-        const translations = {
-            uk: {
-                upgradeTitle: "🚀 Подвійний клік (+1)",
-                navGame: "Дім",
-                navTasks: "Карта",
-                navFriends: "Топ",
-                navWallet: "Івенти",
-                navSettings: "Профіль",
-                tasksHeader: "🗺️ Карта та Завдання",
-                task1Title: "📢 Підписка на канал",
-                task1Desc: "Підпишіться на телеграм канал для отримання бонусів.",
-                task1Btn: "Отримати +500",
-                friendsHeader: "🏆 Топ гравців & Друзі",
-                friendsDesc: "Запрошуйте друзів та отримуйте % від їхніх кліків!",
-                friendsLinkTitle: "Твоє посилання:",
-                walletHeader: "⭐ Івенти",
-                walletDesc: "Беріть участь у спеціальних івентах заради цінних нагород.",
-                settingsHeader: "👤 Профіль & Налаштування",
-                settingsLangTitle: "Мова / Язык"
-            },
-            ru: {
-                upgradeTitle: "🚀 Двойной клик (+1)",
-                navGame: "Дом",
-                navTasks: "Карта",
-                navFriends: "Топ",
-                navWallet: "Ивенты",
-                navSettings: "Профиль",
-                tasksHeader: "🗺️ Карта и Задания",
-                task1Title: "📢 Подписка на канал",
-                task1Desc: "Подпишитесь на телеграм канал для получения бонусов.",
-                task1Btn: "Получить +500",
-                friendsHeader
+  <style>
+    /* Custom Scrollbar Removal & Mobile Optimization */
+    body {
+      touch-action: manipulation;
+      user-select: none;
+      -webkit-user-select: none;
+      -webkit-touch-callout: none;
+      background-color: #0b0f19;
+      color: #f8fafc;
+      overflow: hidden;
+      height: 100vh;
+      width: 100vw;
+    }
+
+    /* Glassmorphism utility */
+    .glass-card {
+      background: rgba(30, 41, 59, 0.65);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+    }
+
+    .glass-card-interactive:active {
+      transform: scale(0.98);
+      opacity: 0.9;
+    }
+
+    /* Coin Glow effect */
+    .coin-glow {
+      box-shadow: 0 0 50px rgba(245, 158, 11, 0.35);
+    }
+    .coin-glow:active {
+      box-shadow: 0 0 80px rgba(245, 158, 11, 0.6);
+    }
+
+    /* Floating Tap Text Marker */
+    .tap-pop {
+      position: absolute;
+      pointer-events: none;
+      font-weight: 800;
+      color: #38bdf8;
+      text-shadow: 0px 2px 10px rgba(56, 189, 248, 0.8);
+      z-index: 100;
+      animation: floatUp 0.8s ease-out forwards;
+    }
+
+    /* Hide Scrollbars */
+    .no-scrollbar::-webkit-scrollbar {
+      display: none;
+    }
+    .no-scrollbar {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+  </style>
+</head>
+<body class="font-sans antialiased flex flex-col justify-between h-screen w-screen overflow-hidden bg-slate-950 text-slate-100">
+
+  <!-- TOP HEADER / STATS OVERVIEW -->
+  <header class="w-full pt-4 px-4 flex justify-between items-center z-10">
+    <div class="flex items-center space-x-2 glass-card px-3 py-1.5 rounded-full">
+      <div id="user-avatar" class="w-7 h-7 rounded-full bg-gradient-to-tr from-cyan-500 to-blue-600 flex items-center justify-center text-xs font-bold text-white uppercase">
+        TG
+      </div>
+      <span id="user-name" class="text-xs font-medium truncate max-w-[100px]">Player</span>
+    </div>
+
+    <!-- Rank Badge -->
+    <div class="glass-card px-3 py-1.5 rounded-full flex items-center space-x-2">
+      <i class="fa-solid fa-trophy text-amber-400 text-xs"></i>
+      <span id="user-rank" class="text-xs font-semibold text-amber-300">Bronze</span>
+    </div>
+  </header>
+
+  <!-- MAIN VIEWPORT CONTAINER -->
+  <main class="flex-1 relative overflow-y-auto no-scrollbar pb-24 pt-2 px-4 flex flex-col justify-center items-center">
+
+    <!-- ==================== TAB 1: CLICKER GAME ==================== -->
+    <section id="tab-game" class="w-full flex flex-col items-center justify-between h-full py-2">
+      
+      <!-- Balance Display -->
+      <div class="flex flex-col items-center mt-2">
+        <div class="flex items-center justify-center space-x-3">
+          <i class="fa-solid fa-coins text-4xl text-amber-400 drop-shadow-[0_0_15px_rgba(245,158,11,0.5)]"></i>
+          <span id="balance" class="text-5xl font-extrabold tracking-tight text-white">0</span>
+        </div>
+        
+        <!-- Passive Income Display -->
+        <div class="mt-2 text-xs font-medium text-slate-400 flex items-center space-x-1.5 bg-slate-900/60 px-3 py-1 rounded-full border border-slate-800">
+          <i class="fa-solid fa-bolt text-emerald-400"></i>
+          <span>Passive Income: <strong id="pnl-rate" class="text-emerald-400">+0</strong>/sec</span>
+        </div>
+      </div>
+
+      <!-- Rank Progress Bar -->
+      <div class="w-full max-w-xs mt-3">
+        <div class="flex justify-between text-[10px] text-slate-400 font-medium mb-1 px-1">
+          <span id="rank-current-title">Bronze</span>
+          <span id="rank-progress-text">0 / 1,000</span>
+        </div>
+        <div class="w-full bg-slate-800/80 rounded-full h-2 overflow-hidden p-0.5 border border-slate-700/50">
+          <div id="rank-bar" class="bg-gradient-to-r from-amber-500 via-amber-400 to-yellow-300 h-full rounded-full transition-all duration-300" style="width: 0%"></div>
+        </div>
+      </div>
+
+      <!-- Main Clicker Coin -->
+      <div class="relative my-auto flex items-center justify-center">
+        <!-- Pulse Rings -->
+        <div class="absolute w-64 h-64 rounded-full bg-amber-500/10 animate-ping pointer-events-none"></div>
+        <div class="absolute w-72 h-72 rounded-full bg-blue-500/5 blur-xl pointer-events-none"></div>
+
+        <button id="coin-btn" class="relative w-64 h-64 rounded-full bg-gradient-to-b from-amber-300 via-amber-500 to-amber-700 p-2 coin-glow transition-transform duration-75 active:scale-95 focus:outline-none select-none flex items-center justify-center cursor-pointer border-4 border-amber-200/50 shadow-2xl">
+          <div class="w-full h-full rounded-full bg-gradient-to-tr from-amber-600 via-amber-400 to-yellow-200 flex items-center justify-center border-2 border-amber-300 shadow-inner">
+            <i class="fa-solid fa-bolt-lightning text-8xl text-amber-900/80 drop-shadow-lg"></i>
+          </div>
+        </button>
+      </div>
+
+      <!-- Energy System -->
+      <div class="w-full max-w-xs flex flex-col items-center">
+        <div class="w-full flex justify-between items-center mb-1 px-1 text-xs">
+          <div class="flex items-center space-x-1.5 text-amber-400 font-semibold">
+            <i class="fa-solid fa-charging-station text-sm"></i>
+            <span id="energy-text">1000 / 1000</span>
+          </div>
+          <span class="text-[10px] text-slate-400">Regenerates continuous</span>
+        </div>
+        <div class="w-full bg-slate-800/80 rounded-full h-3 overflow-hidden border border-slate-700/50 p-0.5">
+          <div id="energy-bar" class="bg-gradient-to-r from-amber-500 to-yellow-400 h-full rounded-full transition-all duration-150" style="width: 100%"></div>
+        </div>
+      </div>
+
+    </section>
+
+    <!-- ==================== TAB 2: SHOP / BOOSTS ==================== -->
+    <section id="tab-shop" class="w-full flex flex-col items-center space-y-3 hidden">
+      <h2 class="text-xl font-bold text-slate-100 flex items-center space-x-2">
+        <i class="fa-solid fa-rocket text-amber-400"></i>
+        <span>Boosters & Upgrades</span>
+      </h2>
+      <p class="text-xs text-slate-400 text-center mb-2">Upgrade your mining power to earn faster!</p>
+
+      <div class="w-full space-y-2.5">
+        
+        <!-- Multi-Tap Upgrade Card -->
+        <div class="glass-card p-3.5 rounded-2xl flex items-center justify-between">
+          <div class="flex items-center space-x-3">
+            <div class="w-12 h-12 rounded-xl bg-amber-500/20 flex items-center justify-center text-amber-400 text-xl border border-amber-500/30">
+              <i class="fa-solid fa-hand-pointer"></i>
+            </div>
+            <div>
+              <div class="text-sm font-bold text-white">Multitap</div>
+              <div class="text-[11px] text-slate-400">Increase tap limit by <span id="tap-power-increase" class="text-emerald-400">+1</span></div>
+              <div class="text-xs font-semibold text-amber-400 mt-0.5">Lvl <span id="tap-lvl">1</span></div>
+            </div>
+          </div>
+          <button id="buy-tap" class="px-3.5 py-2 rounded-xl bg-gradient-to-r from-amber-500 to-yellow-500 hover:from-amber-600 hover:to-yellow-600 text-slate-950 font-bold text-xs shadow-lg glass-card-interactive flex items-center space-x-1">
+            <i class="fa-solid fa-coins text-[10px]"></i>
+            <span id="tap-cost">100</span>
+          </button>
+        </div>
+
+        <!-- Energy Capacity Upgrade Card -->
+        <div class="glass-card p-3.5 rounded-2xl flex items-center justify-between">
+          <div class="flex items-center space-x-3">
+            <div class="w-12 h-12 rounded-xl bg-blue-500/20 flex items-center justify-center text-blue-400 text-xl border border-blue-500/30">
+              <i class="fa-solid fa-battery-full"></i>
+            </div>
+            <div>
+              <div class="text-sm font-bold text-white">Energy Limit</div>
+              <div class="text-[11px] text-slate-400">Increase max energy by <span class="text-emerald-400">+500</span></div>
+              <div class="text-xs font-semibold text-blue-400 mt-0.5">Lvl <span id="energy-lvl">1</span></div>
+            </div>
+          </div>
+          <button id="buy-energy" class="px-3.5 py-2 rounded-xl bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600 text-slate-950 font-bold text-xs shadow-lg glass-card-interactive flex items-center space-x-1">
+            <i class="fa-solid fa-coins text-[10px]"></i>
+            <span id="energy-cost">200</span>
+          </button>
+        </div>
+
+        <!-- Passive Mining Bot Card -->
+        <div class="glass-card p-3.5 rounded-2xl flex items-center justify-between">
+          <div class="flex items-center space-x-3">
+            <div class="w-12 h-12 rounded-xl bg-purple-500/20 flex items-center justify-center text-purple-400 text-xl border border-purple-500/30">
+              <i class="fa-solid fa-robot"></i>
+            </div>
+            <div>
+              <div class="text-sm font-bold text-white">Auto-Mining Bot</div>
+              <div class="text-[11px] text-slate-400">Earns <span class="text-emerald-400">+5</span> coins / sec</div>
+              <div class="text-xs font-semibold text-purple-400 mt-0.5">Lvl <span id="passive-lvl">0</span></div>
+            </div>
+          </div>
+          <button id="buy-passive" class="px-3.5 py-2 rounded-xl bg-gradient-to-r from-purple-500 to-indigo-500 hover:from-purple-600 hover:to-indigo-600 text-slate-100 font-bold text-xs shadow-lg glass-card-interactive flex items-center space-x-1">
+            <i class="fa-solid fa-coins text-[10px] text-amber-300"></i>
+            <span id="passive-cost">500</span>
+          </button>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ==================== TAB 3: TASKS & QUESTS ==================== -->
+    <section id="tab-tasks" class="w-full flex flex-col items-center space-y-3 hidden">
+      <h2 class="text-xl font-bold text-slate-100 flex items-center space-x-2">
+        <i class="fa-solid fa-list-check text-sky-400"></i>
+        <span>Earn Rewards</span>
+      </h2>
+      <p class="text-xs text-slate-400 text-center mb-2">Complete quick tasks to get free coins instantly!</p>
+
+      <div class="w-full space-y-2.5">
+        
+        <!-- Task Item 1 -->
+        <div class="glass-card p-3.5 rounded-2xl flex items-center justify-between">
+          <div class="flex items-center space-x-3">
+            <div class="w-10 h-10 rounded-xl bg-sky-500/20 flex items-center justify-center text-sky-400 text-lg">
+              <i class="fa-brands text-sky-400 fa-telegram"></i>
+            </div>
+            <div>
+              <div class="text-xs font-bold text-white">Join TG Channel</div>
+              <div class="text-[10px] text-amber-400 font-semibold">+1,000 Coins</div>
+            </div>
+          </div>
+          <button id="task-1" onclick="claimTask(1, 1000)" class="px-3 py-1.5 rounded-lg bg-sky-500 hover:bg-sky-600 text-slate-950 font-bold text-xs glass-card-interactive">
+            Claim
+          </button>
+        </div>
+
+        <!-- Task Item 2 -->
+        <div class="glass-card p-3.5 rounded-2xl flex items-center justify-between">
+          <div class="flex items-center space-x-3">
+            <div class="w-10 h-10 rounded-xl bg-blue-500/20 flex items-center justify-center text-blue-400 text-lg">
+              <i class="fa-brands fa-twitter"></i>
+            </div>
+            <div>
+              <div class="text-xs font-bold text-white">Follow X / Twitter</div>
+              <div class="text-[10px] text-amber-400 font-semibold">+2,000 Coins</div>
+            </div>
+          </div>
+          <button id="task-2" onclick="claimTask(2, 2000)" class="px-3 py-1.5 rounded-lg bg-sky-500 hover:bg-sky-600 text-slate-950 font-bold text-xs glass-card-interactive">
+            Claim
+          </button>
+        </div>
+
+        <!-- Task Item 3 -->
+        <div class="glass-card p-3.5 rounded-2xl flex items-center justify-between">
+          <div class="flex items-center space-x-3">
+            <div class="w-10 h-10 rounded-xl bg-emerald-500/20 flex items-center justify-center text-emerald-400 text-lg">
+              <i class="fa-solid fa-calendar-check"></i>
+            </div>
+            <div>
+              <div class="text-xs font-bold text-white">Daily Check-In</div>
+              <div class="text-[10px] text-amber-400 font-semibold">+500 Coins</div>
+            </div>
+          </div>
+          <button id="task-3" onclick="claimTask(3, 500)" class="px-3 py-1.5 rounded-lg bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-bold text-xs glass-card-interactive">
+            Claim
+          </button>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ==================== TAB 4: STATS / PROFILE ==================== -->
+    <section id="tab-stats" class="w-full flex flex-col items-center space-y-3 hidden">
+      <h2 class="text-xl font-bold text-slate-100 flex items-center space-x-2">
+        <i class="fa-solid fa-chart-pie text-purple-400"></i>
+        <span>Player Profile</span>
+      </h2>
+      <p class="text-xs text-slate-400 text-center mb-2">Track your total progress and gameplay stats</p>
+
+      <div class="w-full glass-card p-4 rounded-2xl space-y-3">
+        <div class="flex justify-between items-center border-b border-slate-700/50 pb-2">
+          <span class="text-xs text-slate-400">Total Touches / Taps:</span>
+          <span id="stat-taps" class="text-sm font-bold text-amber-400">0</span>
+        </div>
+        <div class="flex justify-between items-center border-b border-slate-700/50 pb-2">
+          <span class="text-xs text-slate-400">Total Coins Mined:</span>
+          <span id="stat-total" class="text-sm font-bold text-emerald-400">0</span>
+        </div>
+        <div class="flex justify-between items-center border-b border-slate-700/50 pb-2">
+          <span class="text-xs text-slate-400">Current Tap Power:</span>
+          <span id="stat-power" class="text-sm font-bold text-sky-400">1</span>
+        </div>
+        <div class="flex justify-between items-center">
+          <span class="text-xs text-slate-400">Telegram User ID:</span>
+          <span id="stat-tgid" class="text-xs font-mono text-slate-300">Not Connected</span>
+        </div>
+      </div>
+
+      <!-- Instructions Modal Toggle Button -->
+      <button onclick="toggleInstructions()" class="w-full py-3 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-xs font-semibold text-slate-300 flex items-center justify-center space-x-2 transition-all">
+        <i class="fa-brands fa-github text-base"></i>
+        <span>Deployment & GitHub Instructions</span>
+      </button>
+    </section>
+
+  </main>
+
+  <!-- BOTTOM FIXED NAVIGATION BAR -->
+  <nav class="fixed bottom-0 left-0 right-0 glass-card border-t border-slate-800/80 px-4 py-2 z-50">
+    <div class="max-w-md mx-auto flex justify-around items-center">
+      
+      <button onclick="switchTab('game')" id="nav-game" class="flex flex-col items-center space-y-1 text-amber-400 transition-colors">
+        <i class="fa-solid fa-gamepad text-lg"></i>
+        <span class="text-[10px] font-medium">Earn</span>
+      </button>
+
+      <button onclick="switchTab('shop')" id="nav-shop" class="flex flex-col items-center space-y-1 text-slate-500 hover:text-slate-300 transition-colors">
+        <i class="fa-solid fa-rocket text-lg"></i>
+        <span class="text-[10px] font-medium">Boosts</span>
+      </button>
+
+      <button onclick="switchTab('tasks')" id="nav-tasks" class="flex flex-col items-center space-y-1 text-slate-500 hover:text-slate-300 transition-colors">
+        <i class="fa-solid fa-list-check text-lg"></i>
+        <span class="text-[10px] font-medium">Tasks</span>
+      </button>
+
+      <button onclick="switchTab('stats')" id="nav-stats" class="flex flex-col items-center space-y-1 text-slate-500 hover:text-slate-300 transition-colors">
+        <i class="fa-solid fa-chart-pie text-lg"></i>
+        <span class="text-[10px] font-medium">Stats</span>
+      </button>
+
+    </div>
+  </nav>
+
+  <!-- GITHUB DEPLOYMENT INSTRUCTIONS MODAL -->
+  <div id="instructions-modal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-50 flex items-center justify-center p-4 hidden">
+    <div class="glass-card w-full max-w-sm rounded-2xl p-5 relative border border-slate-700 max-h-[85vh] overflow-y-auto no-scrollbar">
+      <button onclick="toggleInstructions()" class="absolute top-4 right-4 text-slate-400 hover:text-white">
+        <i class="fa-solid fa-xmark text-lg"></i>
+      </button>
+      <h3 class="text-lg font-bold text-amber-400 mb-3 flex items-center space-x-2">
+        <i class="fa-brands fa-github"></i>
+        <span>Deployment Guide</span>
+      </h3>
+      <ol class="text-xs text-slate-300 space-y-3 list-decimal list-inside leading-relaxed">
+        <li><strong>Create Repository:</strong> Create a new public repository on GitHub named <code>telegram-clicker</code>.</li>
+        <li><strong>Upload File:</strong> Save this exact code as <code>index.html</code> and push/upload it to your repository main branch.</li>
+        <li><strong>Enable Pages:</strong> Go to <em>Settings -> Pages</em>, set the Source branch to <code>main</code>, and click <strong>Save</strong>.</li>
+        <li><strong>Copy URL:</strong> Copy the live site link (e.g. <code>https://username.github.io/telegram-clicker/</code>).</li>
+        <li><strong>Create Telegram Bot:</strong> Open Telegram, search for <strong>@BotFather</strong>, send <code>/newbot</code>, and follow the setup prompts.</li>
+        <li><strong>Link Mini-App:</strong> Send <code>/newapp</code> to BotFather, choose your created bot, set the WebApp URL to your GitHub Pages link.</li>
+      </ol>
+      <button onclick="toggleInstructions()" class="w-full mt-5 py-2.5 bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold rounded-xl text-xs">
+        Got it!
+      </button>
+    </div>
+  </div>
+
+  <!-- GAME LOGIC SCRIPT -->
+  <script>
+    // ==========================================
+    // STATE MANAGEMENT & DATA MODEL
+    // ==========================================
+    let state = {
+      coins: 0,
+      totalEarned: 0,
+      totalTa
